@@ -155,7 +155,7 @@ private fun AppCard(appInfo: AppInfo) {
         val iconModifier = Modifier
             .padding(horizontal = 10.dp)
             .size(38.dp)
-        SimplifyImage(appInfo.icon.asImageBitmap(), iconModifier)
+        SimplifyImage(appInfo.icon!!.asImageBitmap(), iconModifier)
         val typography = MaterialTheme.typography
         Column {
             Text(appInfo.label, style = typography.titleMedium, softWrap = false)

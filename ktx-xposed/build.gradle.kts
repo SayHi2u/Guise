@@ -6,7 +6,7 @@ plugins {
 
 android {
     namespace = "com.houvven.ktx_xposed"
-    compileSdk = 33
+    compileSdk = 37
 
     defaultConfig {
         minSdk = 29
@@ -35,7 +35,8 @@ android {
 }
 
 dependencies {
-    compileOnly("de.robv.android.xposed:api:82")
+    compileOnly("io.github.libxposed:api:102.0.0")
+    compileOnly("io.github.libxposed:service:102.0.0")
     implementation("androidx.core:core-ktx:1.9.0")
     implementation(project(":lib"))
 

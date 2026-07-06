@@ -14,17 +14,21 @@ class BatteryHook : LoadPackageHandler {
 
         BatteryManager::class.java.afterHookedMethod(
             methodName = "getIntProperty", Int::class.java
-        ) { param ->
-            if (param.args[0] == BatteryManager.BATTERY_PROPERTY_CAPACITY) {
-                param.result = level
+        ) { chain ->
+            if (chain.args[0] == BatteryManager.BATTERY_PROPERTY_CAPACITY) {
+                level
+            } else {
+                chain.proceed()
             }
         }
 
         Intent::class.java.afterHookedMethod(
             methodName = "getIntExtra", String::class.java, Int::class.java
-        ) { param ->
-            if (param.args[0] == BatteryManager.EXTRA_LEVEL) {
-                param.result = level
+        ) { chain ->
+            if (chain.args[0] == BatteryManager.EXTRA_LEVEL) {
+                level
+            } else {
+                chain.proceed()
             }
         }
     }

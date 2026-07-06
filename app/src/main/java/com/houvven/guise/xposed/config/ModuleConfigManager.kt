@@ -14,7 +14,6 @@ import com.houvven.guise.lsposed.LsposedHelper
 import com.houvven.guise.module.ktx.runThread
 import com.houvven.guise.ui.routing.LauncherState
 import com.houvven.guise.xposed.PackageConfig
-import com.houvven.ktx_xposed.SafeSharePrefs
 import com.houvven.lib.command.ShellActuators
 
 class ModuleConfigManager
@@ -25,14 +24,10 @@ private constructor(
 
     private val superLsposed get() = AppConfigKey.run { mmkv.decodeBool(SUPER_LSPOSED, false) }
 
-
     private val modulePkgName = BuildConfig.APPLICATION_ID
 
     private val safePrefs
-        get() = SafeSharePrefs.of(
-            ContextAmbient.current,
-            PackageConfig.PREF_FILE_NAME
-        )
+        get() = ContextAmbient.current.getSharedPreferences(PackageConfig.PREF_FILE_NAME, android.content.Context.MODE_PRIVATE)
 
     private val context = ContextAmbient.current
 
@@ -45,13 +40,30 @@ private constructor(
         val json = config.toJson()
         val enable = config.isEnable
         LauncherState.apps.value.find { it.packageName == config.packageName }?.isEnable = enable
+
+        // Write to SharedPreferences (for UI)
         if (enable) {
             safePrefs.edit { putString(config.packageName, json) }
+        } else {
+            safePrefs.edit(commit = true) { remove(config.packageName) }
+        }
+
+        // Write to remote preferences (for hook side)
+        val service = ContextAmbient.service
+        if (service != null) {
+            val remotePrefs = service.getRemotePreferences("guise_config")
+            if (enable) {
+                remotePrefs.edit().putString(config.packageName, json).apply()
+            } else {
+                remotePrefs.edit().remove(config.packageName).apply()
+            }
+        }
+
+        if (enable) {
             if (superLsposed) runThread {
                 LsposedHelper.addScope(modulePkgName, config.packageName)
             }
         } else {
-            safePrefs.edit(commit = true) { remove(config.packageName) }
             if (superLsposed) runThread {
                 LsposedHelper.removeScope(modulePkgName, config.packageName)
             }
@@ -93,7 +105,6 @@ private constructor(
             val configField = configFields.find { it.name == stateFiled.name } ?: continue
             val value = (stateFiled.get(state) as MutableState<*>).value
             configField.isAccessible = true
-            // if (configField.get(empty) == value) continue
 
             if (configField.type == Boolean::class.java) {
                 configField.setBoolean(config, value as Boolean)
@@ -142,6 +153,4 @@ private constructor(
 
         fun empty() = of(ModuleConfig())
     }
-
-
 }

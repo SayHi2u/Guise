@@ -12,7 +12,7 @@ import com.houvven.ktx_xposed.logger.XposedLogger
 class BuildConfigHook : LoadPackageHandler {
 
     override fun onHook() {
-        val name = lppram.packageName
+        val name = lppram.moduleApplicationInfo.packageName
         val targetClass = findClassIfExists("$name.BuildConfig")
 
         if (targetClass == null) {
@@ -21,17 +21,18 @@ class BuildConfigHook : LoadPackageHandler {
         }
 
         PackageManager::class.java.run {
-            afterHookAllMethods("getPackageInfo") {
-                if (it.args.contains(lppram.packageName)) {
-                    it.result = PackageInfo().apply {
+            afterHookAllMethods("getPackageInfo") { chain ->
+                if (chain.args.contains(name)) {
+                    PackageInfo().apply {
                         versionName = config.versionName
                         versionCode = config.versionCode
                         longVersionCode = config.versionCode.toLong()
                     }
+                } else {
+                    chain.proceed()
                 }
             }
         }
-
 
         if (config.versionCode != -1) {
             targetClass.setStaticField("VERSION_CODE", config.versionCode)

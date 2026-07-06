@@ -3,10 +3,8 @@ package com.houvven.guise.xposed.hook.location
 import android.telephony.CellIdentityCdma
 import android.telephony.CellIdentityGsm
 import android.telephony.CellIdentityLte
-import android.telephony.CellIdentityNr
 import android.telephony.CellIdentityTdscdma
 import android.telephony.CellIdentityWcdma
-import android.telephony.CellInfoNr
 import android.telephony.gsm.GsmCellLocation
 import com.houvven.guise.xposed.LoadPackageHandler
 import com.houvven.ktx_xposed.hook.setMethodResult
@@ -31,5 +29,4 @@ class CellLocationHook : LoadPackageHandler {
             CellIdentityWcdma::class.java.setMethodResult("getCid", config.cid)
         }
     }
-
 }

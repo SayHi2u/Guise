@@ -9,7 +9,6 @@ import android.os.Build
 import android.os.UserHandle
 import android.telephony.PhoneStateListener
 import android.telephony.TelephonyManager
-import android.telephony.TelephonyManager.INCLUDE_LOCATION_DATA_NONE
 import android.telephony.gsm.GsmCellLocation
 import com.houvven.ktx_xposed.hook.beforeHookSomeSameNameMethod
 import com.houvven.ktx_xposed.hook.setMethodResult
@@ -32,13 +31,13 @@ open class LocationHookBase {
             )
             beforeHookSomeSameNameMethod(
                 "isProviderEnabledForUser", "hasProvider"
-            ) {
-                when (it.args[0] as String) {
-                    LocationManager.GPS_PROVIDER -> it.result = true
+            ) { chain ->
+                when (chain.args[0] as String) {
+                    LocationManager.GPS_PROVIDER -> true
                     LocationManager.FUSED_PROVIDER,
                     LocationManager.NETWORK_PROVIDER,
-                    LocationManager.PASSIVE_PROVIDER,
-                    -> it.result = false
+                    LocationManager.PASSIVE_PROVIDER -> false
+                    else -> chain.proceed()
                 }
             }
             setSomeSameNameMethodResult(
@@ -53,7 +52,6 @@ open class LocationHookBase {
         }
     }
 
-
     private fun setTelLocationFail() {
         TelephonyManager::class.java.run {
             setSomeSameNameMethodResult(
@@ -66,7 +64,7 @@ open class LocationHookBase {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 setMethodResult(
                     methodName = "getLocationData",
-                    value = INCLUDE_LOCATION_DATA_NONE
+                    value = TelephonyManager.INCLUDE_LOCATION_DATA_NONE
                 )
             }
         }
@@ -77,7 +75,6 @@ open class LocationHookBase {
                 "onCellInfoChanged",
                 value = null
             )
-
     }
 
     protected fun makeWifiLocationFail() {
@@ -99,6 +96,4 @@ open class LocationHookBase {
             setMethodResult("getLac", -1)
         }
     }
-
-
 }

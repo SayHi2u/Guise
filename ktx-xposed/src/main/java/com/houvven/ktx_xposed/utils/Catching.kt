@@ -1,12 +1,12 @@
 package com.houvven.ktx_xposed.utils
 
-import com.houvven.ktx_xposed.logger.XposedLogger
+import android.util.Log
 
 inline fun <R> runXposedCatching(block: () -> R): R? {
     return try {
         block()
     } catch (e: Throwable) {
-        XposedLogger.e(e)
+        Log.e("XposedCatch", e.toString(), e)
         null
     }
 }

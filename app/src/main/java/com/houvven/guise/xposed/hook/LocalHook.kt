@@ -22,29 +22,19 @@ class LocalHook : LoadPackageHandler {
             else Locale(language, country)
         }.onSuccess { locale ->
             country = locale.country
-            val displayLanguage = locale.displayLanguage
-            val displayCountry = locale.displayCountry
-            val displayName = locale.displayName
-            val displayVariant = locale.displayVariant
-            val displayScript = locale.displayScript
-            val script = locale.script
-            val variant = locale.variant
-            val toLanguageTag = locale.toLanguageTag()
-            val toString = locale.toString()
-
             Locale::class.java.run {
                 setMethodResult("getDefault", locale)
-                setMethodResult("getLanguage", language)
-                setMethodResult("getCountry", country)
-                setMethodResult("getVariant", variant)
-                setMethodResult("getScript", script)
-                setMethodResult("getDisplayLanguage", displayLanguage)
-                setMethodResult("getDisplayCountry", displayCountry)
-                setMethodResult("getDisplayName", displayName)
-                setMethodResult("getDisplayVariant", displayVariant)
-                setMethodResult("getDisplayScript", displayScript)
-                setMethodResult("toLanguageTag", toLanguageTag)
-                setMethodResult("toString", toString)
+                setMethodResult("getLanguage", locale.language)
+                setMethodResult("getCountry", locale.country)
+                setMethodResult("getVariant", locale.variant)
+                setMethodResult("getScript", locale.script)
+                setMethodResult("getDisplayLanguage", locale.displayLanguage)
+                setMethodResult("getDisplayCountry", locale.displayCountry)
+                setMethodResult("getDisplayName", locale.displayName)
+                setMethodResult("getDisplayVariant", locale.displayVariant)
+                setMethodResult("getDisplayScript", locale.displayScript)
+                setMethodResult("toLanguageTag", locale.toLanguageTag())
+                setMethodResult("toString", locale.toString())
             }
         }
     }

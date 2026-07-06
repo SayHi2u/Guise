@@ -8,15 +8,13 @@ import android.os.Build
 import androidx.core.graphics.drawable.toBitmap
 import com.houvven.guise.ContextAmbient
 import com.houvven.guise.xposed.PackageConfig
-import com.houvven.ktx_xposed.SafeSharePrefs
 
 @SuppressLint("StaticFieldLeak")
 object AppInfoProvider {
 
     private val context = ContextAmbient.current
     private val packageManager get() = context.packageManager
-    private val safeSharePrefs get() = SafeSharePrefs.of(context, PackageConfig.PREF_FILE_NAME)
-
+    private val safeSharePrefs get() = context.getSharedPreferences(PackageConfig.PREF_FILE_NAME, android.content.Context.MODE_PRIVATE)
 
     fun getList(): ArrayList<AppInfo> {
         val list = arrayListOf<AppInfo>()
@@ -39,9 +37,16 @@ object AppInfoProvider {
             packageManager.getInstalledPackages(PackageManager.PackageInfoFlags.of(0L))
         else packageManager.getInstalledPackages(0)
 
-
     private fun generateAppInfo(packageInfo: PackageInfo): AppInfo {
-        val applicationInfo = packageInfo.applicationInfo
+        val applicationInfo = packageInfo.applicationInfo ?: return AppInfo(
+            isEnable = false,
+            label = packageInfo.packageName,
+            packageName = packageInfo.packageName,
+            icon = null,
+            installTime = packageInfo.firstInstallTime,
+            updateTime = packageInfo.lastUpdateTime,
+            isSystemApp = false
+        )
         val packageName = applicationInfo.packageName
 
         val isEnable = safeSharePrefs.contains(packageName)
@@ -61,6 +66,4 @@ object AppInfoProvider {
             isSystemApp = isSystemApp
         )
     }
-
-
 }

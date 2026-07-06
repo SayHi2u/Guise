@@ -13,9 +13,10 @@ class HookSuccessHint : LoadPackageHandler {
         Application::class.java.afterHookedMethod(
             methodName = "attach",
             Context::class.java
-        ) { param ->
-            val context = param.args[0] as Context
+        ) { chain ->
+            val context = chain.args[0] as Context
             context.showToast("Guise's hook success prompt")
+            chain.proceed()
         }
     }
 }

@@ -5,9 +5,8 @@ import android.net.Uri
 import android.provider.ContactsContract
 import android.provider.MediaStore
 import com.houvven.guise.xposed.LoadPackageHandler
-import com.houvven.ktx_xposed.utils.getTypeArgIndexOfFirst
 import com.houvven.ktx_xposed.hook.beforeHookAllMethods
-import com.houvven.ktx_xposed.utils.setNullResult
+import com.houvven.ktx_xposed.utils.getTypeArgIndexOfFirst
 
 class BlankPass : LoadPackageHandler {
 
@@ -23,12 +22,10 @@ class BlankPass : LoadPackageHandler {
     }
 
     private fun contentResolverQuery(uri: Uri) {
-        ContentResolver::class.java.beforeHookAllMethods("query") { param ->
-            val index = param.getTypeArgIndexOfFirst(Uri::class.java)
-            if (index == -1 || uri != param.args[index]) return@beforeHookAllMethods
-            param.setNullResult()
+        ContentResolver::class.java.beforeHookAllMethods("query") { chain ->
+            val index = chain.getTypeArgIndexOfFirst(Uri::class.java)
+            if (index == -1 || uri != chain.args[index]) return@beforeHookAllMethods
+            return@beforeHookAllMethods
         }
     }
-
-
 }

@@ -17,15 +17,17 @@ android {
             enableV3Signing = true
             val config = getSigningConfig()
             val keyPath = config["storeFile"] ?: System.getenv("KEYSTORE_PATH")
-            storeFile = file(keyPath)
-            storePassword = config.getProperty("storePassword") ?: System.getenv("KEYSTORE_PWD")
-            keyAlias = config.getProperty("keyAlias") ?: System.getenv("KEY_ALIAS")
-            keyPassword = config.getProperty("keyPassword") ?: System.getenv("KEY_PWD")
+            if (keyPath != null) {
+                storeFile = file(keyPath)
+                storePassword = config.getProperty("storePassword") ?: System.getenv("KEYSTORE_PWD")
+                keyAlias = config.getProperty("keyAlias") ?: System.getenv("KEY_ALIAS")
+                keyPassword = config.getProperty("keyPassword") ?: System.getenv("KEY_PWD")
+            }
         }
     }
 
     namespace = "com.houvven.guise"
-    compileSdk = 33
+    compileSdk = 37
 
     defaultConfig {
         applicationId = namespace
@@ -71,16 +73,23 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.3.2"
     }
-    packagingOptions {
+    packaging {
         resources {
-            excludes += "/META-INF/**"
+            excludes += "/META-INF/NOTICE"
+            excludes += "/META-INF/LICENSE"
+            excludes += "/META-INF/LICENSE.txt"
+            excludes += "/META-INF/NOTICE.txt"
+            excludes += "/META-INF/INDEX.LIST"
+            excludes += "/META-INF/DEPENDENCIES"
             excludes += "/kotlin/**"
             excludes += "/*.txt"
             excludes += "/*.bin"
+            merges += "META-INF/xposed/*"
         }
         dex {
             useLegacyPackaging = true
@@ -123,7 +132,8 @@ dependencies {
     val roomVersion = "2.5.0"
 
 
-    compileOnly("de.robv.android.xposed:api:82")
+    compileOnly("io.github.libxposed:api:102.0.0")
+    implementation("io.github.libxposed:service:102.0.0")
     implementation(project(":ktx-xposed"))
     implementation("com.tencent:mmkv:1.2.15")
     // implementation("io.github.admin4j:http:0.4.0")

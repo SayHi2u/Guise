@@ -114,7 +114,7 @@ fun EnableTemplateScreen(template: Template) {
                 // horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 SimplifyIcon(
-                    appInfo.icon.asImageBitmap(),
+                    appInfo.icon!!.asImageBitmap(),
                     modifier = Modifier.size(30.dp),
                     tint = Color.Unspecified
                 )

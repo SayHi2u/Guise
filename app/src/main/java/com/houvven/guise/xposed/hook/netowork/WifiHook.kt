@@ -12,5 +12,4 @@ internal class WifiHook : LoadPackageHandler {
             if (config.wifiMacAddress.isNotBlank()) setMethodResult("getMacAddress", config.wifiMacAddress)
         }
     }
-
 }

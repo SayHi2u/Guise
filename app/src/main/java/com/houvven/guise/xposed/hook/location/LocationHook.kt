@@ -19,10 +19,8 @@ import com.houvven.ktx_xposed.hook.setAllMethodResult
 import com.houvven.ktx_xposed.hook.setMethodResult
 import com.houvven.ktx_xposed.hook.setSomeSameNameMethodResult
 
-
 @Suppress("DEPRECATION")
 class LocationHook : LoadPackageHandler, LocationHookBase() {
-
 
     private var latitude = config.latitude
     private var longitude = config.longitude
@@ -35,11 +33,9 @@ class LocationHook : LoadPackageHandler, LocationHookBase() {
     private val carrierFrequencies = cn0s.clone()
     private val basebandCn0DbHzs = cn0s.clone()
 
-
     override fun onHook() {
         if (longitude == -1.0 && latitude == -1.0) return
 
-        // LocationHook Enabled
         if (config.randomOffset) {
             latitude += (Math.random() - 0.5) * 0.0001
             longitude += (Math.random() - 0.5) * 0.0001
@@ -48,7 +44,7 @@ class LocationHook : LoadPackageHandler, LocationHookBase() {
         if (config.makeCellLocationFail) makeCellLocationFail()
 
         fakeLatlng()
-        setOtherServicesFail()  // 使其他定位服务失效
+        setOtherServicesFail()
         hookGnssStatus()
         hookLocationUpdate()
         setLastLocation()
@@ -76,11 +72,11 @@ class LocationHook : LoadPackageHandler, LocationHookBase() {
         LocationManager::class.java.afterHookedMethod(
             methodName = "addGpsStatusListener",
             GpsStatus.Listener::class.java
-        ) { param ->
-            (param.args[0] as GpsStatus.Listener?)?.run {
-                callMethod("onGpsStatusChanged", GPS_EVENT_STARTED)
-                callMethod("onGpsStatusChanged", GPS_EVENT_FIRST_FIX)
-            }
+        ) { chain ->
+            val listener = chain.args[0] as? GpsStatus.Listener
+            listener?.callMethod("onGpsStatusChanged", GPS_EVENT_STARTED)
+            listener?.callMethod("onGpsStatusChanged", GPS_EVENT_FIRST_FIX)
+            chain.proceed()
         }
     }
 
@@ -88,8 +84,8 @@ class LocationHook : LoadPackageHandler, LocationHookBase() {
         LocationManager::class.java.beforeHookedMethod(
             methodName = "getGpsStatus",
             GpsStatus::class.java
-        ) { param ->
-            val status = param.args[0] as GpsStatus? ?: return@beforeHookedMethod
+        ) { chain ->
+            val status = chain.args[0] as? GpsStatus ?: return@beforeHookedMethod
 
             val method = GpsStatus::class.java.findMethodExactIfExists(
                 "setStatus",
@@ -106,9 +102,7 @@ class LocationHook : LoadPackageHandler, LocationHookBase() {
                 Int::class.java
             )
 
-            if (method == null && method2 == null) {
-                return@beforeHookedMethod
-            }
+            if (method == null && method2 == null) return@beforeHookedMethod
 
             {
                 method?.invoke(status, svCount, svidWithFlags, cn0s, elevations, azimuths)
@@ -127,11 +121,9 @@ class LocationHook : LoadPackageHandler, LocationHookBase() {
                 }
             }.let {
                 it()
-                param.args[0] = status
-                param.result = status
                 it()
-                param.result = status
             }
+            chain.proceed()
         }
     }
 
@@ -144,14 +136,14 @@ class LocationHook : LoadPackageHandler, LocationHookBase() {
             FloatArray::class.java,
             FloatArray::class.java,
             FloatArray::class.java
-        ) {
-            it.args[0] = svCount
-            it.args[1] = svidWithFlags
-            it.args[2] = cn0s
-            it.args[3] = elevations
-            it.args[4] = azimuths
-            it.args[5] = carrierFrequencies
-            it.args[6] = basebandCn0DbHzs
+        ) { chain ->
+            chain.args[0] = svCount
+            chain.args[1] = svidWithFlags
+            chain.args[2] = cn0s
+            chain.args[3] = elevations
+            chain.args[4] = azimuths
+            chain.args[5] = carrierFrequencies
+            chain.args[6] = basebandCn0DbHzs
         }
     }
 
@@ -160,17 +152,17 @@ class LocationHook : LoadPackageHandler, LocationHookBase() {
         val requestSingleUpdate = "requestSingleUpdate"
 
         LocationManager::class.java.run {
-            var target: String
             for (method in declaredMethods) {
                 if (method.name != requestLocationUpdates && method.name != requestSingleUpdate) continue
                 val indexOf = method.parameterTypes.indexOf(LocationListener::class.java)
                 if (indexOf == -1) continue
                 val paramsTypes = method.parameterTypes
-                target = method.name
-                afterHookedMethod(target, *paramsTypes) {
-                    val listener = it.args[indexOf] as LocationListener
+                val target = method.name
+                afterHookedMethod(target, *paramsTypes) { chain ->
+                    val listener = chain.args[indexOf] as LocationListener
                     val location = modifyLocation(Location(LocationManager.GPS_PROVIDER))
                     listener.onLocationChanged(location)
+                    chain.proceed()
                 }
             }
         }

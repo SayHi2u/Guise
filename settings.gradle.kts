@@ -11,6 +11,11 @@ dependencyResolutionManagement {
         google()
         mavenCentral()
         maven("https://api.xposed.info")
+        mavenLocal {
+            content {
+                includeGroup("io.github.libxposed")
+            }
+        }
     }
 }
 rootProject.name = "Guise"

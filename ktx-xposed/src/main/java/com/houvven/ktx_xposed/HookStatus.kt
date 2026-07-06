@@ -2,8 +2,13 @@ package com.houvven.ktx_xposed
 
 class HookStatus {
     companion object {
-        fun isActivated(): Boolean {
-            return false
+        @Volatile
+        private var activated = false
+
+        fun setActivated(value: Boolean) {
+            activated = value
         }
+
+        fun isActivated(): Boolean = activated
     }
 }

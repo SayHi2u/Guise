@@ -13,7 +13,6 @@ internal class NetworkHook : LoadPackageHandler {
         listOf(WifiHook(), SimHook()).forEach { it.onHook() }
     }
 
-
     private fun hookNetworkType() {
         val networkType = config.networkType
         this.hookBaseNetType(networkType)
@@ -29,10 +28,8 @@ internal class NetworkHook : LoadPackageHandler {
             HooksValue.NET_MOBILE_4G,
             HooksValue.NET_MOBILE_3G,
             HooksValue.NET_MOBILE_2G -> NetworkType.MOBILE
-
             else -> NetworkType.NONE
         }
         NetworkInfo::class.java.setMethodResult("getType", t)
     }
-
 }
