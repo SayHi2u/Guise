@@ -32,6 +32,8 @@ class HookInit : XposedModule() {
 
         if (param.packageName == BuildConfig.APPLICATION_ID) return
 
+        XposedLogger.currentTargetPackage = param.packageName
+        XposedLogger.doHookModuleLog()
         XposedLogger.i("start loadPackage: ${param.packageName}")
         PackageConfig.doRefresh(param.packageName)
 

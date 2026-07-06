@@ -16,6 +16,7 @@ object XposedLogger {
 
     private val logList = mutableListOf<Pair<Char, String>>()
     private val uri = Uri.parse("content://com.houvven.xposed.runtime.log/module_log")
+    var currentTargetPackage: String = ""
 
     fun d(msg: String) { logList.add('D' to msg) }
     fun i(msg: String) { logList.add('I' to msg) }
@@ -31,7 +32,7 @@ object XposedLogger {
                     logList.forEach { log ->
                         contentValuesOf(
                             "type" to log.first.toString(),
-                            "source" to "unknown",
+                            "source" to currentTargetPackage,
                             "message" to log.second
                         ).let { activity.contentResolver.insert(uri, it) }
                     }

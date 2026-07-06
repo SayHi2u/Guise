@@ -12,17 +12,17 @@ import com.houvven.ktx_xposed.logger.XposedLogger
 class BuildConfigHook : LoadPackageHandler {
 
     override fun onHook() {
-        val name = lppram.moduleApplicationInfo.packageName
-        val targetClass = findClassIfExists("$name.BuildConfig")
+        val targetPkg = XposedLogger.currentTargetPackage
+        val targetClass = findClassIfExists("$targetPkg.BuildConfig")
 
         if (targetClass == null) {
-            XposedLogger.i("BuildConfigHook: $name.BuildConfig not found.")
+            XposedLogger.i("BuildConfigHook: $targetPkg.BuildConfig not found.")
             return
         }
 
         PackageManager::class.java.run {
             afterHookAllMethods("getPackageInfo") { chain ->
-                if (chain.args.contains(name)) {
+                if (chain.args.contains(targetPkg)) {
                     PackageInfo().apply {
                         versionName = config.versionName
                         versionCode = config.versionCode

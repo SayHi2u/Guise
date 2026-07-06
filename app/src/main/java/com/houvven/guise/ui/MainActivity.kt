@@ -3,6 +3,7 @@ package com.houvven.guise.ui
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -23,7 +24,9 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             GuiseTheme {
-                Scaffold(snackbarHost = {
+                Scaffold(
+                    contentWindowInsets = WindowInsets(0, 0, 0, 0),
+                    snackbarHost = {
                     SnackbarHost(
                         hostState = GlobalSnackbarHost.state,
                         modifier = Modifier.padding(bottom = 80.dp),
@@ -40,9 +43,7 @@ class MainActivity : ComponentActivity() {
                 }) {
                     Surface(
                         color = MaterialTheme.colorScheme.surface,
-                        modifier = Modifier.padding(
-                            top = it.calculateTopPadding(), bottom = it.calculateBottomPadding()
-                        )
+                        modifier = Modifier.padding(bottom = it.calculateBottomPadding())
                     ) {
                         NavigationRoute()
                     }
